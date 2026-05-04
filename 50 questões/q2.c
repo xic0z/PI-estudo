@@ -1,6 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/*
+ * =============================================================
+ *               LISTAS LIGADAS — PROGRAMAÇÃO IMPERATIVA
+ * =============================================================
+ */
+
 typedef struct lligada {
     int valor;
     struct lligada *prox;
@@ -183,3 +189,272 @@ int removeAll (LInt *l, int x) {
     }
     return count;
 }
+
+// QUESTÃO 11
+int removeDups (LInt *l) {
+    if(*l==NULL) return 0;
+
+    int count = 0;
+    LInt fixo = *l;
+
+    while(fixo!=NULL) {
+        LInt anterior = fixo;
+
+        while(anterior->prox!=NULL){
+            if(anterior->prox->valor == fixo->valor) {
+                LInt temp = anterior->prox;
+                anterior->prox = temp->prox;
+                free(temp);
+                count++;
+            } else {
+                anterior = anterior->prox;
+            }
+        }
+        fixo = fixo->prox;
+    }
+    return count;
+}
+
+// QUESTÃO 12
+int removeMaiorL (LInt *l) {
+    LInt anterior = (*l);
+    LInt atual = (*l)->prox;
+
+    LInt antMaior = NULL;
+    int maxValor = (*l)->valor;
+
+    while(atual!=NULL) {
+        if(atual->valor > maxValor) {
+            maxValor = atual->valor;
+            antMaior = anterior;
+        }
+        anterior = atual;
+        atual = atual->prox;
+    }
+    LInt aRemover;
+    if(antMaior == NULL) {
+        aRemover = (*l);
+        *l = (*l)->prox;
+    } else {
+        aRemover = antMaior->prox;
+        antMaior->prox = aRemover->prox;
+    }
+    free(aRemover);
+    return maxValor;
+}
+
+// QUESTÃO 13 
+void init (LInt *l) {
+    LInt atual = (*l);
+    if(atual->prox==NULL) {
+        free(atual);
+        *l = NULL;
+        return;
+    }
+    while(atual->prox->prox != NULL) {
+        atual = atual->prox; //Da info do penultimo elemento
+    }
+    LInt ultimo = atual->prox;
+    atual->prox = NULL;
+    free(ultimo);
+}
+
+// QUESTÃO 14
+void appendL (LInt *l, int x) {
+    LInt novo = malloc(sizeof(struct lligada));
+    novo->valor = x;
+    novo->prox = NULL;
+
+    if(*l==NULL) {
+        *l = novo;
+        return;
+    }
+    LInt atual = (*l);
+    while(atual->prox != NULL) {
+        atual = atual->prox;
+    }
+    atual->prox = novo;
+}
+
+// QUESTÃO 15
+void concatL (LInt *a, LInt b) {
+    if(*a==NULL) {
+        *a = b;
+        return;
+    }
+    LInt atual = (*a);
+    while(atual->prox != NULL) {
+        atual = atual->prox; //chegar ao fim da lista a
+    }
+    atual->prox = b;
+}
+
+// QUESTÃO 16
+LInt cloneL (LInt l) {
+    if(l==NULL) return NULL;
+
+    LInt novaLista = malloc(sizeof(struct lligada));
+    novaLista->valor = l->valor;
+
+    LInt ultimo = novaLista;
+
+    LInt atual = l->prox;
+    while(atual!= NULL) {
+        LInt novoNo = malloc(sizeof(struct lligada));
+        novoNo->valor = atual->valor;
+        ultimo->prox = novoNo;
+        atual = atual->prox;
+    }
+    ultimo->prox = NULL;
+    return novaLista;
+}   
+
+// QUESTÃO 17
+LInt cloneRev (LInt l) {
+    if(l==NULL) return NULL;
+
+    LInt novaLista = NULL;
+    LInt atual = l;
+
+    while(atual!=NULL) {
+        LInt novoNo = malloc(sizeof(struct lligada));
+        novoNo->valor = atual->valor;
+        novoNo->prox = novaLista;
+        novaLista = novoNo;
+        atual = atual->prox;
+    }
+    return novaLista;
+}
+
+// QUESTÃO 19
+int take (int n, LInt *l) {
+    if(*l==NULL) return 0;
+    if(n<=0) {
+        LInt atual = *l;
+        int conta = 0;
+        while(atual!=NULL) {
+            LInt temp = atual;
+            atual = atual->prox;
+            free(temp);
+            conta++;
+        }
+        *l = NULL;
+        return 0;
+    }
+    LInt atual = *l;
+    int i = 1;
+
+    while(i<n && atual->prox != NULL) {
+        atual = atual->prox;
+        i++;
+    }
+    if (atual->prox == NULL) return i;
+
+    LInt prox = atual->prox;
+    atual->prox = NULL;
+
+    while(prox!=NULL) {
+        LInt temp = prox;
+        prox = prox->prox;
+        free(temp);
+    }
+    return n;
+}
+
+// QUESTÃO 20
+int drop (int n, LInt *l) {
+    if(*l==NULL) return 0;
+    if(n<=0) return contaElem(*l);
+
+    LInt atual = *l;
+    int apagados = 0;
+
+    while(apagados<n && *l!=NULL) {
+        LInt temp = *l;
+        *l = (*l)->prox;
+        free(temp);
+        apagados++;
+    }
+    return contaElem(*l);
+}
+
+int contaElem (LInt l) {
+    if(l==NULL) return 0;
+    
+    int conta = 0;
+    while(l!=NULL) {
+        conta ++;
+        l = l->prox;
+    }
+    return conta;
+}
+
+// QUESTÃO 22
+int listToArray (LInt l, int v[], int N) {
+    if(l==NULL) return 0;
+
+    int i = 0;
+    while(l!=NULL && i<N) {
+        v[i] = l->valor;
+        l = l->prox;
+        i++;
+    }
+    return i;
+}
+
+// QUESTÃO 23
+LInt arrayToList (int v[], int N) {
+    if(N==0) return NULL;
+    
+    LInt inicio = malloc(sizeof(struct lligada));
+    inicio->valor = v[0];
+    inicio->prox = NULL;
+
+    LInt atual = inicio;
+
+    for(int i=1;i<N;i++) {
+        LInt novo = malloc(sizeof(struct lligada));
+        novo->valor = v[i];
+        novo->prox = NULL;
+
+        atual->prox = novo;
+
+        atual = novo;
+    }
+    return inicio;
+}
+
+// QUESTÃO 24
+LInt somasAcL (LInt l) {
+    if(l==NULL) return 0;
+
+    LInt novaLista = malloc(sizeof(struct lligada));
+    int soma = l->valor;
+    novaLista->valor = soma;
+    novaLista->prox = NULL;
+
+    LInt ultimo = novaLista;
+    LInt atual = l->prox;
+
+    while(atual!=NULL) {
+        soma += atual->valor;
+
+        LInt novo = malloc(sizeof(struct lligada));
+        novo->valor = soma;
+        novo->prox = NULL;
+
+        ultimo->prox = novo;
+        ultimo = novo;
+
+        atual = atual->prox;
+    }
+    return novaLista;
+}
+
+// QUESTÃO 27
+
+/*
+ * =============================================================
+ *              ÁRVORES BINÁRIAS — PROGRAMAÇÃO IMPERATIVA
+ * =============================================================
+ */
