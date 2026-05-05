@@ -362,6 +362,17 @@ int take (int n, LInt *l) {
 }
 
 // QUESTÃO 20
+int contaElem (LInt l) {
+    int contador = 0;
+    
+    while (l != NULL) {
+        contador++;   
+        l = l->prox;  
+    }
+    
+    return contador;
+}
+
 int drop (int n, LInt *l) {
     if(*l==NULL) return 0;
     if(n<=0) return contaElem(*l);
@@ -376,17 +387,6 @@ int drop (int n, LInt *l) {
         apagados++;
     }
     return contaElem(*l);
-}
-
-int contaElem (LInt l) {
-    if(l==NULL) return 0;
-    
-    int conta = 0;
-    while(l!=NULL) {
-        conta ++;
-        l = l->prox;
-    }
-    return conta;
 }
 
 // QUESTÃO 22
@@ -458,3 +458,199 @@ LInt somasAcL (LInt l) {
  *              ÁRVORES BINÁRIAS — PROGRAMAÇÃO IMPERATIVA
  * =============================================================
  */
+
+typedef struct nodo {
+    int valor;
+    struct nodo *esq, *dir;
+} *ABin;
+
+// QUESTÃO 28
+int altura (ABin a) {
+    if (a==NULL) {
+        return 0;
+    } 
+
+    int alt_esq = altura(a->esq);
+    int alt_dir = altura(a->dir);
+
+    if(alt_esq > alt_dir) {
+        return 1 + alt_esq;
+    } else {
+        return 1 + alt_dir;
+    }
+}
+
+// QUESTÃO 29
+ABin cloneAB (ABin a) {
+    if (a==NULL) return NULL;
+
+    ABin novo = malloc(sizeof(struct nodo));
+    novo->valor = a->valor;
+
+    novo->esq = cloneAB(a->esq);
+    novo->dir = cloneAB(a->dir);
+
+    return novo;
+}
+
+// QUESTÃO 30
+void mirror (ABin *a) {
+    if(*a==NULL) return;
+    
+    ABin temp = (*a)->esq;
+    (*a)->esq = (*a)->dir;
+    (*a)->dir = temp;
+
+    mirror(&((*a)->esq));
+    mirror(&((*a)->dir));
+}
+
+// QUESTÃO 31
+void inorder (ABin a , LInt *l) {
+    if(a==NULL) return;
+
+    inorder(a->dir,l);
+    LInt novo = malloc(sizeof(struct lligada));
+    novo->valor = a->valor;
+    novo->prox = (*l);
+    (*l) = novo;
+    inorder(a->esq,l);
+}
+
+// QUESTÃO 34 
+int depth (ABin a, int x) {
+    if(a==NULL) return -1;
+    if(a->valor==x) return 1;
+
+    int esq = depth(a->esq,x);
+    int dir = depth(a->dir,x);
+
+    if(esq == -1) return 1 + dir;
+    if(dir == -1) return 1 + esq;
+
+    return 1 + (esq<dir ? esq : dir);
+}
+
+// QUESTÃO 35
+int freeAB (ABin a) {
+    if(a==NULL) return 0;
+
+    int esq = freeAB(a->esq);
+    int dir = freeAB(a->dir);
+
+    free(a);
+
+    return 1 + esq + dir;
+}
+
+// QUESTÃO 36
+int pruneAB (ABin *a, int l) {
+    if(*a==NULL) return 0;
+
+    int contagem = 0;
+
+    if(l>0) {
+        int esq = pruneAB(&((*a)->esq),l-1);
+        int dir = pruneAB(&((*a)->dir),l-1);
+        return contagem += esq+dir;
+    } else if(l==0) {
+        contagem += freeAB((*a)->esq);
+        contagem += freeAB((*a)->dir);
+        (*a)->esq = NULL;
+        (*a)->dir = NULL;
+    }
+    return contagem;
+}
+
+// QUESTÃO 37
+int iguaisAB (ABin a, ABin b) {
+    if(a==NULL && b==NULL) return 1;
+    if(a==NULL || b==NULL) return 0;
+    if(a->valor!=b->valor) return 0;
+
+    return(iguaisAB(a->esq,b->esq) && iguaisAB(a->dir,b->dir));
+}
+
+// QUESTÃO 42
+int contaFolhas (ABin a) {
+    if(a==NULL) return 0;
+    if(a->esq==NULL && a->dir==NULL) return 1;
+
+    int total_esq = contaFolhas(a->esq);
+    int total_dir = contaFolhas(a->dir);
+    return total_esq + total_dir;
+}
+
+// QUESTÃO 44
+int addOrd (ABin *a, int x) {
+    if(a==NULL) return 0;
+    if((*a)->valor == x) return 1;
+
+    ABin atual = (*a);
+    ABin anterior = NULL;
+    while(atual!=NULL) {
+        if(x==atual->valor) {
+            return 1;
+        } else if(x<atual->valor) {
+            anterior = atual;
+            atual = atual->esq;
+        } else {
+            anterior=atual;
+            atual = atual->dir;
+        }
+    }
+    ABin novo = malloc(sizeof(struct nodo));
+    novo->valor = x;
+    novo->esq = NULL;
+    novo->dir = NULL;
+
+    if(anterior == NULL) {
+        (*a)=novo;
+    } else if(x<anterior->valor) {
+        anterior->esq = novo;
+    } else {
+        anterior->dir = novo;
+    }
+    return 0;
+}
+
+// QUESTÃO 45
+int lookupAB (ABin a, int x)  {
+    if(a==NULL) return 0;
+
+    ABin atual = a;
+
+    while(atual!=NULL) {
+        if(x == atual->valor) {
+            return 1;
+        } else if (x < atual->valor) {
+            atual = atual->esq;
+        } else {
+            atual = atual->dir;
+        }
+    }
+    return 0;
+}
+
+// QUESTÃO 47
+int maiorAB (ABin a) {
+    if (a==NULL) return -1;
+
+    ABin atual = a;
+
+    while(atual->dir!=NULL) {
+        atual = atual->dir;
+    }
+    return atual->valor;
+}
+
+// QUESTÃO 49
+int quantosMaiores (ABin a, int x) {
+    if(a==NULL) return 0;
+
+    if(a->valor > x) {
+        return 1 + quantosMaiores (a->dir,x) + quantosMaiores(a->esq,x);
+    } else {
+        return quantosMaiores(a->dir,x);
+    }
+}
