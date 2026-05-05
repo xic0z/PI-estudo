@@ -584,7 +584,6 @@ int contaFolhas (ABin a) {
 // QUESTÃO 44
 int addOrd (ABin *a, int x) {
     if(a==NULL) return 0;
-    if((*a)->valor == x) return 1;
 
     ABin atual = (*a);
     ABin anterior = NULL;
